@@ -1,0 +1,105 @@
+body{
+    background:rgb(37,37,39);
+    height: 100%;
+}
+
+*{
+    line-height: 20px;
+    outline: 0;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe WPC', 'Segoe UI', 'Ubuntu', 'Droid Sans', sans-serif;
+}
+
+main{
+    display: grid;
+    grid-template-columns: 50% 50%;
+}
+
+#input,
+#preview{
+    margin: 0px;
+    height: 90vh;
+    max-height: 90vh;
+    padding: 0px;
+    color: rgb(131,126,132);
+    font-size: 18px;
+    background: rgb(30,30,30);
+    overflow: hidden;
+    overflow-y: scroll;
+}
+
+#input{
+    resize: none;
+    border: none;
+    margin-right: 2.5px;
+    resize: none;
+}
+
+p{
+    padding: 0px;
+    margin: 0px;
+    margin-left: 2.5px;
+    overflow-wrap: break-word;
+    word-wrap: break-word;
+    white-space: pre-line;
+}
+
+#preview > p{
+    padding-top: 20px;
+}
+
+#preview > p:first-child{
+    padding: 0px;
+}
+
+::-webkit-scrollbar {
+    width: 0px;
+    background: transparent; /* make scrollbar transparent */
+}
+
+input{
+    border: none;
+    font-size: 22px;
+    background: rgb(47,47,49);
+    color: rgb(107,107,109);
+}
+
+#toolbar{
+    margin-top: 5px;
+}
+
+#saveBtn,
+#loadBtn{
+    width: 100px;
+    padding-top: 5px;
+    padding-bottom: 5px;
+}
+
+input[type=button]:hover{
+    color: #f3f3f3;
+    background: rgb(30,30,30);
+    transition: 0.2s;
+}
+
+
+#toolbar > input{
+    font-size: 22px;
+    padding: 0px;
+    margin: 0px;
+    height: 25px;
+}
+
+#toolbar > input[type=button]{
+    width: 40px;   
+}
+
+#search{
+    width: 150px;
+}
+
+#cursive{
+    font-style: italic;
+}
+
+#fatty{
+    font-style: 900;
+}

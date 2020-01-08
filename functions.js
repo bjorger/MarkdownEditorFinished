@@ -2,6 +2,8 @@ const fs = require('fs');
 const { dialog } = require('electron').remote;
 const remote = require('electron').remote;
 
+const { ipcRenderer } = require('electron');
+
 let oldSearchTerm = '';
 
 let preview = document.getElementById('preview');
@@ -35,7 +37,7 @@ document.addEventListener('keyup', function(e) {
 		w.close();
 	}
 
-	if(replace.value.length > 0 && search.value.length > 0 && e.keyCode === 13){
+	if (replace.value.length > 0 && search.value.length > 0 && e.keyCode === 13) {
 		replaceFunction();
 	}
 });
@@ -53,9 +55,7 @@ saveBtn.addEventListener('click', function() {
 	saveFile();
 });
 
-loadBtn.addEventListener('click', function() {
-	loadFile();
-});
+
 
 headline.addEventListener('click', function() {
 	addHeadline();
@@ -73,13 +73,9 @@ line.addEventListener('click', function() {
 	var text = input.value;
 	var selectionStart = input.selectionStart;
 
-	var newText =
-		text.substring(0, selectionStart) +
-		'\n\n---\n\n' +
-		text.substring(selectionStart, text.length);
-	
-	input.value = newText;
+	var newText = text.substring(0, selectionStart) + '\n\n---\n\n' + text.substring(selectionStart, text.length);
 
+	input.value = newText;
 });
 
 link.addEventListener('click', function() {
@@ -99,12 +95,9 @@ email.addEventListener('click', function() {
 	var selectionStart = input.selectionStart;
 
 	var newText =
-		text.substring(0, selectionStart) +
-		'<mail@example.com>' +
-		text.substring(selectionStart, text.length);
-	
-	input.value = newText;
+		text.substring(0, selectionStart) + '<mail@example.com>' + text.substring(selectionStart, text.length);
 
+	input.value = newText;
 });
 
 function generateMarkdown() {
@@ -135,7 +128,7 @@ function addHeadline() {
 	indexOfLastLineBreak++;
 
 	if (selectionEnd === selectionStart) {
-		if(splitTxt.length === 1){
+		if (splitTxt.length === 1) {
 			indexOfLastLineBreak = 0;
 		}
 		var newText =
@@ -143,7 +136,6 @@ function addHeadline() {
 			'# ' +
 			text.substring(indexOfLastLineBreak + offset, text.length);
 	} else {
-		console.log(indexOfLastLineBreak);
 		if (indexOfLastLineBreak > 2) {
 			var newText =
 				text.substring(0, indexOfLastLineBreak + offset) +
@@ -186,6 +178,8 @@ function makeCursive() {
 	input.value = newText;
 }
 
+ipcRenderer.send('saveFile', saveFile);
+
 function saveFile() {
 	dialog
 		.showSaveDialog({
@@ -196,36 +190,28 @@ function saveFile() {
 				},
 			],
 		})
-		.then(dialogObject => {
-			if (dialogObject.canceled === true) {
+		.then(({ canceled, filePath }) => {
+			if (canceled === true) {
 				return;
 			}
 
-			fs.writeFileSync(dialogObject.filePaths[0], input.value);
+			fs.writeFileSync(filePath, input.value);
 		});
 }
 
-function loadFile() {
-	dialog
-		.showOpenDialog({
-			filters: [
-				{
-					name: 'Markdown File (*.md)',
-					extensions: ['md'],
-				},
-			],
-		})
-		.then(dialogObject => {
-			if (dialogObject.canceled === true) {
-				return;
-			}
+loadBtn.addEventListener('click', function() {
+	ipcRenderer.send('openFiles');
+});
 
-			let val;
+ipcRenderer.on('openFile', (e, msg) => {
+	loadFile(msg.path);
+});
 
-			fs.readFileSync(dialogObject.filePaths[0], val);
-
-			input.value = val;
-		});
+function loadFile(path) {
+	let val;
+	val = fs.readFileSync(path, {encoding: 'utf-8'});
+	console.log(val);
+	input.value = val;
 }
 
 // https://stackoverflow.com/questions/52743841/find-and-highlight-word-in-text-using-js

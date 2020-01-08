@@ -1,37 +1,58 @@
-const { app, BrowserWindow } = require('electron')
+const { app, BrowserWindow, ipcMain } = require('electron');
 
-let win
+let window;
 
-function createWindow () {
+function createWindow() {
+	window = new BrowserWindow({
+		width: 800,
+		height: 600,
+		webPreferences: {
+			nodeIntegration: true,
+		},
+	});
 
-  win = new BrowserWindow({
-    width: 800,
-    height: 600,
-    webPreferences: {
-      nodeIntegration: true
-    }
-  })
+	window.loadFile('index.html');
 
-  win.loadFile('index.html')
+	window.webContents.openDevTools();
 
-  win.webContents.openDevTools()
+	window.on('closed', () => {
+		window = null;
+	});
 
-  win.on('closed', () => {
-    win = null
-  })
-
-  win.maximize();
+	window.maximize();
 }
-app.on('ready', createWindow)
+app.on('ready', createWindow);
 
 app.on('window-all-closed', () => {
-  if (process.platform !== 'darwin') {
-    app.quit()
-  }
-})
+	if (process.platform !== 'darwin') {
+		app.quit();
+	}
+});
 
 app.on('activate', () => {
-  if (win === null) {
-    createWindow()
-  }
-})
+	if (win === null) {
+		createWindow();
+	}
+});
+
+function openFile() {
+
+	const { dialog } = require('electron');
+	dialog
+		.showOpenDialog({
+			properties: ['openFile'],
+			filters: [
+				{ name: 'Markdown Files (.md)', extensions: ['md'] },
+				{ name: 'All Files (*)', extensions: ['*'] },
+			],
+		})
+		.then(({ canceled, filePaths }) => {
+			if (canceled === true) {
+				return;
+      }
+
+			window.webContents.send('openFile', { path: filePaths[0] });
+		});
+}
+
+ipcMain.on('openFiles', openFile);

@@ -60,7 +60,7 @@ input{
     border: none;
     font-size: 22px;
     background: rgb(47,47,49);
-    color: rgb(107,107,109);
+    color: #f3f3f3;
 }
 
 #toolbar{
@@ -75,11 +75,13 @@ input{
 }
 
 input[type=button]:hover{
-    color: #f3f3f3;
     background: rgb(30,30,30);
     transition: 0.2s;
 }
 
+#link, #email{
+    width: 80px !important;
+}
 
 #toolbar > input{
     font-size: 22px;
@@ -92,14 +94,19 @@ input[type=button]:hover{
     width: 40px;   
 }
 
-#search{
+#search,
+#replace{
     width: 150px;
 }
-
 #cursive{
     font-style: italic;
 }
 
 #fatty{
     font-style: 900;
+}
+
+mark{
+    background: rgb(1, 74,113);
+    color: white;
 }

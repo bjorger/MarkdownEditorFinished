@@ -55,8 +55,6 @@ saveBtn.addEventListener('click', function() {
 	saveFile();
 });
 
-
-
 headline.addEventListener('click', function() {
 	addHeadline();
 });
@@ -73,7 +71,7 @@ line.addEventListener('click', function() {
 	var text = input.value;
 	var selectionStart = input.selectionStart;
 
-	var newText = text.substring(0, selectionStart) + '\n\n---\n\n' + text.substring(selectionStart, text.length);
+	var newText = text.substring(0, selectionStart) + '\n---\n' + text.substring(selectionStart, text.length);
 
 	input.value = newText;
 });

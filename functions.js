@@ -53,27 +53,32 @@ search.addEventListener('input', function() {
 
 saveBtn.addEventListener('click', function() {
 	saveFile();
+	generateMarkdown();
 });
 
 headline.addEventListener('click', function() {
 	addHeadline();
+	generateMarkdown();
 });
 
 fatty.addEventListener('click', function() {
 	makeFat();
+	generateMarkdown();
 });
 
 cursive.addEventListener('click', function() {
 	makeCursive();
+	generateMarkdown();
 });
 
 line.addEventListener('click', function() {
 	var text = input.value;
 	var selectionStart = input.selectionStart;
 
-	var newText = text.substring(0, selectionStart) + '\n---\n' + text.substring(selectionStart, text.length);
+	var newText = text.substring(0, selectionStart) + '\n\n---\n\n' + text.substring(selectionStart, text.length);
 
 	input.value = newText;
+	generateMarkdown();
 });
 
 link.addEventListener('click', function() {
@@ -86,6 +91,7 @@ link.addEventListener('click', function() {
 		text.substring(selectionStart, text.length);
 
 	input.value = newText;
+	generateMarkdown();
 });
 
 email.addEventListener('click', function() {
@@ -96,6 +102,7 @@ email.addEventListener('click', function() {
 		text.substring(0, selectionStart) + '<mail@example.com>' + text.substring(selectionStart, text.length);
 
 	input.value = newText;
+	generateMarkdown();
 });
 
 function generateMarkdown() {
@@ -107,43 +114,20 @@ function generateMarkdown() {
 
 function addHeadline() {
 	var text = input.value;
-	var selectionStart = input.selectionStart;
-	var selectionEnd = input.selectionEnd;
+	var sign = '# '
 
-	var indexOfLastLineBreak = 0;
-	var amoutOfLineBreaks = 0;
-
-	for (let i = 0; i < selectionStart; i++) {
-		if (text[i] === '\n') {
-			indexOfLastLineBreak = i;
-			amoutOfLineBreaks++;
+	for(let i = input.selectionStart; i >= 0; i--){
+		if(text[i] == '#'){
+			sign = '#'
 		}
+		if(text[i] == '\n'){
+			input.value = text.substring(0, i) + '\n' + sign + text.substring(i + 1, text.length)
+			break
+		}
+		if( i == 0 ){
+			input.value = text.substring(0, i) + sign + text.substring(i, text.length)
+		}	
 	}
-
-	var splitTxt = text.split('\n');
-	var offset = (splitTxt[amoutOfLineBreaks].match(/#/g) || []).length;
-
-	indexOfLastLineBreak++;
-
-	if (selectionEnd === selectionStart) {
-		if (splitTxt.length === 1) {
-			indexOfLastLineBreak = 0;
-		}
-		var newText =
-			text.substring(0, indexOfLastLineBreak + offset) +
-			'# ' +
-			text.substring(indexOfLastLineBreak + offset, text.length);
-	} else {
-		if (indexOfLastLineBreak > 2) {
-			var newText =
-				text.substring(0, indexOfLastLineBreak + offset) +
-				'# ' +
-				text.substring(selectionStart - 1, text.length);
-		} else {
-			var newText = text.substring(0, offset) + '#' + text.substring(selectionStart, text.length);
-		}
-	}
-	input.value = newText;
 }
 
 function makeFat() {

@@ -17,7 +17,8 @@ let search = document.getElementById('search');
 let replace = document.getElementById('replace');
 let line = document.getElementById('line');
 let link = document.getElementById('link');
-let email = document.getElementById('email');
+let quote = document.getElementById('quote');
+let code = document.getElementById('code');
 
 document.addEventListener('keyup', function(e) {
 	generateMarkdown();
@@ -84,24 +85,53 @@ line.addEventListener('click', function() {
 link.addEventListener('click', function() {
 	var text = input.value;
 	var selectionStart = input.selectionStart;
+	var selectionEnd = input.selectionEnd;
 
-	var newText =
-		text.substring(0, selectionStart) +
-		'[Link-Text](http://www.google.at)' +
+	if(selectionStart == selectionEnd){
+		input.value = text.substring(0, selectionStart) +
+		'[Link-Text](http://www.example.com)' +
 		text.substring(selectionStart, text.length);
+	}
+	else{
+		input.value = text.substring(0, selectionStart) + '[ ](' + text.substring(selectionStart, selectionEnd) +  ')' + text.substring(selectionEnd+1, text.length);
+	}
 
-	input.value = newText;
 	generateMarkdown();
 });
 
-email.addEventListener('click', function() {
+quote.addEventListener('click', function() {
 	var text = input.value;
-	var selectionStart = input.selectionStart;
+	var sign = '> '
 
-	var newText =
-		text.substring(0, selectionStart) + '<mail@example.com>' + text.substring(selectionStart, text.length);
+	for(let i = input.selectionStart; i >= 0; i--){
+		if(text[i] == '>'){
+			sign = '>'
+		}
+		if(text[i] == '\n'){
+			input.value = text.substring(0, i) + '\n' + sign + text.substring(i + 1, text.length)
+			break
+		}
+		if( i == 0 ){
+			input.value = text.substring(0, i) + sign + text.substring(i, text.length)
+		}	
+	}
+	generateMarkdown();
+});
 
-	input.value = newText;
+code.addEventListener('click', function(){
+	var text = input.value;
+	var sign = '\t'
+
+	for(let i = input.selectionStart; i >= 0; i--){
+		if(text[i] == '\n'){
+			input.value = text.substring(0, i) + '\n' + sign + text.substring(i + 1, text.length)
+			break
+		}
+		if( i == 0 ){
+			input.value = text.substring(0, i) + sign + text.substring(i, text.length)
+		}	
+	}
+	
 	generateMarkdown();
 });
 

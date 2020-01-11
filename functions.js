@@ -118,22 +118,6 @@ quote.addEventListener('click', function() {
 	generateMarkdown();
 });
 
-code.addEventListener('click', function(){
-	var text = input.value;
-	var sign = '\t'
-
-	for(let i = input.selectionStart; i >= 0; i--){
-		if(text[i] == '\n'){
-			input.value = text.substring(0, i) + '\n' + sign + text.substring(i + 1, text.length)
-			break
-		}
-		if( i == 0 ){
-			input.value = text.substring(0, i) + sign + text.substring(i, text.length)
-		}	
-	}
-	
-	generateMarkdown();
-});
 
 function generateMarkdown() {
 	const marked = require('marked');

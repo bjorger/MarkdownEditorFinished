@@ -1,4 +1,4 @@
-const { app, BrowserWindow, ipcMain } = require('electron');
+const { app, BrowserWindow, ipcMain, Menu, MenuItem } = require('electron');
 
 let window;
 
@@ -54,5 +54,20 @@ function openFile() {
 			window.webContents.send('openFile', { path: filePaths[0] });
 		});
 }
+
+let menu = new Menu();
+menu.append(new MenuItem({
+	label: 'Save',
+	accelerator: 'CommandOrControl+S',
+	click: () => window.webContents.send('saveFile')
+}))
+
+menu.append(new MenuItem({
+	label: 'Open',
+	accelerator: 'CommandOrControl+L',
+	click: openFile
+}))
+
+Menu.setApplicationMenu(menu)
 
 ipcMain.on('openFiles', openFile);

@@ -8,8 +8,6 @@ let oldSearchTerm = '';
 
 let preview = document.getElementById('preview');
 let input = document.getElementById('input');
-let saveBtn = document.getElementById('saveBtn');
-let loadBtn = document.getElementById('loadBtn');
 let headline = document.getElementById('headline');
 let fatty = document.getElementById('fatty');
 let cursive = document.getElementById('cursive');
@@ -18,7 +16,9 @@ let replace = document.getElementById('replace');
 let line = document.getElementById('line');
 let link = document.getElementById('link');
 let quote = document.getElementById('quote');
-let code = document.getElementById('code');
+let tab = document.getElementById('tab');
+
+let currentFilePath = ""
 
 document.addEventListener('keyup', function(e) {
 	generateMarkdown();
@@ -31,8 +31,6 @@ document.addEventListener('keyup', function(e) {
 		makeCursive();
 	} else if (e.ctrlKey && e.which === 83) {
 		saveFile();
-	} else if (e.altKey && e.which === 83) {
-		loadFile();
 	} else if (e.altKey && e.which === 81) {
 		let w = remote.getCurrentWindow();
 		w.close();
@@ -52,10 +50,6 @@ search.addEventListener('input', function() {
 	highlight();
 });
 
-saveBtn.addEventListener('click', function() {
-	saveFile();
-	generateMarkdown();
-});
 
 headline.addEventListener('click', function() {
 	addHeadline();
@@ -177,7 +171,11 @@ function makeCursive() {
 ipcRenderer.send('saveFile', saveFile);
 
 function saveFile() {
-	dialog
+	if(currentFilePath != ""){
+		fs.writeFileSync(currentFilePath, input.value)
+	}
+	else{
+		dialog
 		.showSaveDialog({
 			filters: [
 				{
@@ -193,15 +191,17 @@ function saveFile() {
 
 			fs.writeFileSync(filePath, input.value);
 		});
+	}
 }
 
-loadBtn.addEventListener('click', function() {
-	ipcRenderer.send('openFiles');
-});
 
 ipcRenderer.on('openFile', (e, msg) => {
 	loadFile(msg.path);
+	currentFilePath = msg.path;
+	console.log(msg.path)
 });
+
+ipcRenderer.on('saveFile', saveFile)
 
 function loadFile(path) {
 	let val;

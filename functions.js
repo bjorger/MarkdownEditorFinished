@@ -204,7 +204,6 @@ function saveFile() {
 ipcRenderer.on('openFile', (e, msg) => {
 	loadFile(msg.path);
 	currentFilePath = msg.path;
-	console.log(msg.path);
 });
 
 ipcRenderer.on('saveFile', saveFile);
@@ -220,6 +219,7 @@ function loadFile(filePath) {
 		file: filePath,
 		active: true,
 		content: val,
+		display: true
 	});
 
 	displayTab(id);
@@ -259,8 +259,10 @@ function replaceFunction() {
 
 function displayTab(id) {
 	let oldActive = document.getElementById(currentActiveTabId);
+	let oldDel = document.getElementById('del_' + currentActiveTabId);
 	if (oldActive !== null) {
 		oldActive.classList.remove('active');
+		oldDel.classList.remove('active')
 	}
 	let div = document.createElement('div');
 	div.id = id;
@@ -270,9 +272,13 @@ function displayTab(id) {
 
 	div.addEventListener('click', function() {
 		let oldActive = document.getElementById(currentActiveTabId);
+		let oldDel = document.getElementById('del_' + currentActiveTabId);
+		console.log(oldDel)
 		if (oldActive !== null) {
 			oldActive.classList.remove('active');
+			oldDel.classList.remove('active')
 			document.getElementById(id).classList.add('active')
+			document.getElementById('del_' + id).classList.add('active')
 			input.value = tabs[id].content;
 			currentActiveTabId = id;
 		}
@@ -280,4 +286,35 @@ function displayTab(id) {
 
 	currentActiveTabId = id;
 	tab.append(div);
+
+	let delButton = document.createElement('div');
+	delButton.id = 'del_' + id;
+	delButton.classList.add('deleteButton');
+	delButton.classList.add('active')
+	delButton.innerHTML = 'x';
+
+	delButton.addEventListener('click', function(){
+		tabs[id].display = false;
+		rerenderTabs()
+	})
+	tab.append(delButton)
+}
+
+function rerenderTabs(){
+	let searchreplace = document.getElementById('searchreplace');
+	let newTabs = document.createElement('div')
+	newTabs.id = 'tabs';
+	
+	tabs.forEach(item => {
+		if(item.display === true){
+			let div = document.getElementById(item.id)
+			let delButton = document.getElementById('del_' + item.id)
+			delButton.classList.add('active')
+			newTabs.append(div)
+			newTabs.append(delButton)
+		}
+	})
+	
+	document.getElementById('tabs').remove();
+	searchreplace.insertAdjacentElement('afterend', newTabs);
 }

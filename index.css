@@ -115,7 +115,8 @@ a{
     background: pink
 }
 
-.tabItem{
+.tabItem,
+.deleteButton{
     display: inline-block;
     width: fit-content;
     padding: 5px 10px;

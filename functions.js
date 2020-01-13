@@ -1,6 +1,7 @@
 const fs = require('fs');
 const { dialog } = require('electron').remote;
 const remote = require('electron').remote;
+const path = require('path');
 
 const { ipcRenderer } = require('electron');
 
@@ -16,9 +17,13 @@ let replace = document.getElementById('replace');
 let line = document.getElementById('line');
 let link = document.getElementById('link');
 let quote = document.getElementById('quote');
-let tab = document.getElementById('tab');
+let tab = document.getElementById('tabs');
 
-let currentFilePath = ""
+let tabs = [];
+let tabId = 0;
+let currentActiveTabId = 0;
+
+let currentFilePath = '';
 
 document.addEventListener('keyup', function(e) {
 	generateMarkdown();
@@ -50,7 +55,6 @@ search.addEventListener('input', function() {
 	highlight();
 });
 
-
 headline.addEventListener('click', function() {
 	addHeadline();
 	generateMarkdown();
@@ -81,13 +85,18 @@ link.addEventListener('click', function() {
 	var selectionStart = input.selectionStart;
 	var selectionEnd = input.selectionEnd;
 
-	if(selectionStart == selectionEnd){
-		input.value = text.substring(0, selectionStart) +
-		'[Link-Text](http://www.example.com)' +
-		text.substring(selectionStart, text.length);
-	}
-	else{
-		input.value = text.substring(0, selectionStart) + '[ ](' + text.substring(selectionStart, selectionEnd) +  ')' + text.substring(selectionEnd+1, text.length);
+	if (selectionStart == selectionEnd) {
+		input.value =
+			text.substring(0, selectionStart) +
+			'[Link-Text](http://www.example.com)' +
+			text.substring(selectionStart, text.length);
+	} else {
+		input.value =
+			text.substring(0, selectionStart) +
+			'[ ](' +
+			text.substring(selectionStart, selectionEnd) +
+			')' +
+			text.substring(selectionEnd + 1, text.length);
 	}
 
 	generateMarkdown();
@@ -95,23 +104,22 @@ link.addEventListener('click', function() {
 
 quote.addEventListener('click', function() {
 	var text = input.value;
-	var sign = '> '
+	var sign = '> ';
 
-	for(let i = input.selectionStart; i >= 0; i--){
-		if(text[i] == '>'){
-			sign = '>'
+	for (let i = input.selectionStart; i >= 0; i--) {
+		if (text[i] == '>') {
+			sign = '>';
 		}
-		if(text[i] == '\n'){
-			input.value = text.substring(0, i) + '\n' + sign + text.substring(i + 1, text.length)
-			break
+		if (text[i] == '\n') {
+			input.value = text.substring(0, i) + '\n' + sign + text.substring(i + 1, text.length);
+			break;
 		}
-		if( i == 0 ){
-			input.value = text.substring(0, i) + sign + text.substring(i, text.length)
-		}	
+		if (i == 0) {
+			input.value = text.substring(0, i) + sign + text.substring(i, text.length);
+		}
 	}
 	generateMarkdown();
 });
-
 
 function generateMarkdown() {
 	const marked = require('marked');
@@ -122,19 +130,19 @@ function generateMarkdown() {
 
 function addHeadline() {
 	var text = input.value;
-	var sign = '# '
+	var sign = '# ';
 
-	for(let i = input.selectionStart; i >= 0; i--){
-		if(text[i] == '#'){
-			sign = '#'
+	for (let i = input.selectionStart; i >= 0; i--) {
+		if (text[i] == '#') {
+			sign = '#';
 		}
-		if(text[i] == '\n'){
-			input.value = text.substring(0, i) + '\n' + sign + text.substring(i + 1, text.length)
-			break
+		if (text[i] == '\n') {
+			input.value = text.substring(0, i) + '\n' + sign + text.substring(i + 1, text.length);
+			break;
 		}
-		if( i == 0 ){
-			input.value = text.substring(0, i) + sign + text.substring(i, text.length)
-		}	
+		if (i == 0) {
+			input.value = text.substring(0, i) + sign + text.substring(i, text.length);
+		}
 	}
 }
 
@@ -171,43 +179,50 @@ function makeCursive() {
 ipcRenderer.send('saveFile', saveFile);
 
 function saveFile() {
-	if(currentFilePath != ""){
-		fs.writeFileSync(currentFilePath, input.value)
-	}
-	else{
+	if (currentFilePath != '') {
+		fs.writeFileSync(currentFilePath, input.value);
+	} else {
 		dialog
-		.showSaveDialog({
-			filters: [
-				{
-					name: 'Markdown File (*.md)',
-					extensions: ['md'],
-				},
-			],
-		})
-		.then(({ canceled, filePath }) => {
-			if (canceled === true) {
-				return;
-			}
+			.showSaveDialog({
+				filters: [
+					{
+						name: 'Markdown File (*.md)',
+						extensions: ['md'],
+					},
+				],
+			})
+			.then(({ canceled, filePath }) => {
+				if (canceled === true) {
+					return;
+				}
 
-			fs.writeFileSync(filePath, input.value);
-		});
+				fs.writeFileSync(filePath, input.value);
+			});
 	}
 }
-
 
 ipcRenderer.on('openFile', (e, msg) => {
 	loadFile(msg.path);
 	currentFilePath = msg.path;
-	console.log(msg.path)
+	console.log(msg.path);
 });
 
-ipcRenderer.on('saveFile', saveFile)
+ipcRenderer.on('saveFile', saveFile);
 
-function loadFile(path) {
+function loadFile(filePath) {
 	let val;
-	val = fs.readFileSync(path, {encoding: 'utf-8'});
-	console.log(val);
+	let id = tabId++;
+	val = fs.readFileSync(filePath, { encoding: 'utf-8' });
 	input.value = val;
+	tabs.push({
+		id,
+		title: path.win32.basename(filePath),
+		file: filePath,
+		active: true,
+		content: val,
+	});
+
+	displayTab(id);
 }
 
 // https://stackoverflow.com/questions/52743841/find-and-highlight-word-in-text-using-js
@@ -240,4 +255,29 @@ function replaceFunction() {
 		preview.innerHTML = preview.innerHTML.replace(replaceables[i].innerHTML, replace.value);
 		input.value = preview.textContent;
 	}
+}
+
+function displayTab(id) {
+	let oldActive = document.getElementById(currentActiveTabId);
+	if (oldActive !== null) {
+		oldActive.classList.remove('active');
+	}
+	let div = document.createElement('div');
+	div.id = id;
+	div.classList.add('tabItem');
+	div.classList.add('active');
+	div.innerHTML = tabs[id].title;
+
+	div.addEventListener('click', function() {
+		let oldActive = document.getElementById(currentActiveTabId);
+		if (oldActive !== null) {
+			oldActive.classList.remove('active');
+			document.getElementById(id).classList.add('active')
+			input.value = tabs[id].content;
+			currentActiveTabId = id;
+		}
+	});
+
+	currentActiveTabId = id;
+	tab.append(div);
 }

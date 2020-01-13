@@ -80,18 +80,18 @@ input[type=button]:hover{
 }
 
 #link, #email{
-    width: 80px !important;
+    width: fit-content;
 }
 
 #toolbar > input{
     font-size: 22px;
-    padding: 0px;
+    padding: 0px 10px;
     margin: 0px;
     height: 25px;
 }
 
 #toolbar > input[type=button]{
-    width: 40px;   
+    width: fit-content;   
 }
 
 #search,
@@ -109,4 +109,20 @@ input[type=button]:hover{
 mark{
     background: rgb(1, 74,113);
     color: white;
+}
+
+a{
+    background: pink
+}
+
+.tabItem{
+    display: inline-block;
+    width: fit-content;
+    padding: 5px 10px;
+    background: rgb(47,47,49);
+    color: #f3f3f3;
+}
+
+.active{
+    background: rgb(30,30,30);
 }
